@@ -326,62 +326,6 @@
             border-left: 4px solid #17a2b8;
         }
 
-        .tip {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            border-left: 5px solid #ffc107;
-            padding: 20px;
-            margin-top: 30px;
-            border-radius: 8px;
-            font-size: 14px;
-            color: #856404;
-            line-height: 1.8;
-            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
-        }
-
-        .tip strong {
-            font-size: 15px;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .tip ul {
-            margin-left: 20px;
-            margin-top: 10px;
-        }
-
-        .tip li {
-            margin-bottom: 8px;
-        }
-
-        .age-range-display {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border: 2px solid #e0e0e0;
-        }
-
-        .age-range-display .range-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 12px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 6px;
-        }
-
-        .age-range-display .range-label {
-            font-weight: 600;
-            color: #555;
-            min-width: 120px;
-        }
-
-        .age-range-display .range-value {
-            font-weight: bold;
-            color: #667eea;
-            font-size: 16px;
-        }
-
         .custom-date-toggle {
             display: flex;
             align-items: center;
@@ -513,41 +457,6 @@
             font-weight: bold;
             margin: 8px 0;
             color: #333;
-        }
-
-        .boundary-note {
-            font-size: 14px;
-            color: #666;
-            font-style: italic;
-            margin-top: 5px;
-        }
-
-        .logic-comparison {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            border: 2px dashed #667eea;
-        }
-
-        .logic-comparison-title {
-            font-weight: bold;
-            font-size: 16px;
-            color: #333;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        .logic-comparison-title .icon {
-            margin-right: 8px;
-            font-size: 18px;
-        }
-
-        .logic-comparison-desc {
-            font-size: 14px;
-            color: #666;
-            line-height: 1.6;
         }
 
         @media (max-width: 768px) {
@@ -705,22 +614,6 @@
 
                 <!-- 结果显示区 -->
                 <div id="result" class="result-box"></div>
-
-                <!-- 使用说明 -->
-                <div class="tip">
-                    <strong>💡 使用说明：</strong>
-                    <ul>
-                        <li><strong>计算基准日期：</strong>默认使用当前系统日期，可切换为自定义日期，适用于历史或未来投保场景。</li>
-                        <li><strong>两种输入模式：</strong>支持"按周岁输入"和"按天数输入"两种模式，满足不同保险产品的年龄要求。</li>
-                        <li><strong>按周岁输入：</strong>适用于大多数保险产品，输入最小和最大周岁年龄。</li>
-                        <li><strong>按天数输入：</strong>适用于新生儿保险等特殊场景，最小年龄可输入天数，最大年龄输入周岁。</li>
-                        <li><strong>基础功能：</strong>输入产品年龄要求，点击"全面分析"，系统将计算出符合该年龄要求的出生日期区间。</li>
-                        <li><strong>扩展功能：</strong>如果需要校验具体投保人，可以额外填写"投保人出生日期"，系统将同时显示该投保人的年龄及是否符合投保条件。</li>
-                        <li><strong>计算标准：</strong>年龄计算严格遵循保险行业标准的周岁计算法，精确到天。例如：2000年10月28日出生的人，在2025年10月27日仍为24周岁，10月28日当天才满25周岁。</li>
-                        <li><strong>年龄包含关系：</strong>最小年龄和最大年龄均为"含"，即边界值符合条件。例如：20-45周岁表示20周岁和45周岁的投保人都符合条件。</li>
-                        <li><strong>快捷操作：</strong>所有输入框支持键盘Enter键快速提交，点击"重置"按钮可清空所有输入和结果。</li>
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
@@ -1061,7 +954,7 @@
                             <div class="boundary-item max">
                                 <div class="boundary-icon">🎯</div>
                                 <div class="boundary-content">
-                                    <div class="boundary-title">最大购买年龄（逻辑1）</div>
+                                    <div class="boundary-title">最大购买年龄</div>
                                     <div class="boundary-age-detail">周岁：${maxAge}岁364天</div>
                                     <div class="boundary-date">出生日期：${formatDateChinese(boundaryDates.maxBoundaryDate1)}（或更晚）</div>
                                     <div class="boundary-desc">
@@ -1069,36 +962,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="boundary-item max">
-                                <div class="boundary-icon">🎯</div>
-                                <div class="boundary-content">
-                                    <div class="boundary-title">最大购买年龄（逻辑2）</div>
-                                    <div class="boundary-age-detail">周岁：${maxAge}岁0天</div>
-                                    <div class="boundary-date">出生日期：${formatDateChinese(boundaryDates.maxBoundaryDate2)}（或更晚）</div>
-                                    <div class="boundary-desc">
-                                        在此日期或更晚出生的人，在 ${formatDate(referenceDate)} 刚好到达 ${maxAge} 周岁，符合最大投保年龄要求。
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="logic-comparison">
-                            <div class="logic-comparison-title">
-                                <span class="icon">📝</span>
-                                两种逻辑对比说明
-                            </div>
-                            <div class="logic-comparison-desc">
-                                <p><strong>逻辑1：</strong>严格遵循保险行业标准，最大年龄为"未满下一周岁"，即 ${maxAge} 岁 364 天。这是最常用的标准。</p>
-                                <p><strong>逻辑2：</strong>将最大年龄理解为"刚好满 ${maxAge} 周岁"，即 ${maxAge} 岁 0 天。某些产品可能采用此标准。</p>
-                                <p><strong>推荐使用：</strong>通常情况下，保险行业采用<strong>逻辑1</strong>作为标准计算方法。如有疑问，请参考具体保险产品的条款说明。</p>
-                            </div>
                         </div>
                         
                         <hr class="divider">
                         
                         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e0e0e0;">
                             <p style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px;">
-                                📅 符合投保条件的出生日期区间（基于逻辑1）
+                                📅 符合投保条件的出生日期区间
                             </p>
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #667eea;">
                                 <p style="font-size: 18px; font-weight: bold; color: #667eea; text-align: center; line-height: 1.8;">
@@ -1108,22 +978,6 @@
                             <p style="margin-top: 15px; color: #666; font-size: 14px; line-height: 1.6;">
                                 <strong>说明：</strong>出生日期在此区间内（含边界日期）的投保人，在 ${formatDate(referenceDate)} 这一天的年龄符合 ${minAge}-${maxAge} 周岁的投保要求。
                             </p>
-                        </div>
-
-                        <hr class="divider">
-
-                        <div class="age-range-display">
-                            <p style="font-size: 15px; font-weight: bold; color: #333; margin-bottom: 15px;">
-                                🔍 详细年龄区间分解
-                            </p>
-                            <div class="range-item">
-                                <span class="range-label">最小年龄（${minAge}周岁）：</span>
-                                <span class="range-value">${formatDate(minAgeRange.earliest)} ~ ${formatDate(minAgeRange.latest)}</span>
-                            </div>
-                            <div class="range-item">
-                                <span class="range-label">最大年龄（${maxAge}周岁）：</span>
-                                <span class="range-value">${formatDate(maxAgeRange.earliest)} ~ ${formatDate(maxAgeRange.latest)}</span>
-                            </div>
                         </div>
                 `;
             } else {
@@ -1198,7 +1052,7 @@
                             <div class="boundary-item max">
                                 <div class="boundary-icon">🎯</div>
                                 <div class="boundary-content">
-                                    <div class="boundary-title">最大购买年龄（逻辑1）</div>
+                                    <div class="boundary-title">最大购买年龄</div>
                                     <div class="boundary-age-detail">周岁：${maxAgeYears}岁364天</div>
                                     <div class="boundary-date">出生日期：${formatDateChinese(boundaryDates.maxBoundaryDate1)}（或更晚）</div>
                                     <div class="boundary-desc">
@@ -1206,36 +1060,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="boundary-item max">
-                                <div class="boundary-icon">🎯</div>
-                                <div class="boundary-content">
-                                    <div class="boundary-title">最大购买年龄（逻辑2）</div>
-                                    <div class="boundary-age-detail">周岁：${maxAgeYears}岁0天</div>
-                                    <div class="boundary-date">出生日期：${formatDateChinese(boundaryDates.maxBoundaryDate2)}（或更晚）</div>
-                                    <div class="boundary-desc">
-                                        在此日期或更晚出生的人，在 ${formatDate(referenceDate)} 刚好到达 ${maxAgeYears} 周岁，符合最大投保年龄要求。
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="logic-comparison">
-                            <div class="logic-comparison-title">
-                                <span class="icon">📝</span>
-                                两种逻辑对比说明
-                            </div>
-                            <div class="logic-comparison-desc">
-                                <p><strong>逻辑1：</strong>严格遵循保险行业标准，最大年龄为"未满下一周岁"，即 ${maxAgeYears} 岁 364 天。这是最常用的标准。</p>
-                                <p><strong>逻辑2：</strong>将最大年龄理解为"刚好满 ${maxAgeYears} 周岁"，即 ${maxAgeYears} 岁 0 天。某些产品可能采用此标准。</p>
-                                <p><strong>推荐使用：</strong>通常情况下，保险行业采用<strong>逻辑1</strong>作为标准计算方法。如有疑问，请参考具体保险产品的条款说明。</p>
-                            </div>
                         </div>
                         
                         <hr class="divider">
                         
                         <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #e0e0e0;">
                             <p style="font-size: 16px; font-weight: bold; color: #333; margin-bottom: 15px;">
-                                📅 符合投保条件的出生日期区间（基于逻辑1）
+                                📅 符合投保条件的出生日期区间
                             </p>
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 6px; border-left: 4px solid #667eea;">
                                 <p style="font-size: 18px; font-weight: bold; color: #667eea; text-align: center; line-height: 1.8;">
@@ -1245,22 +1076,6 @@
                             <p style="margin-top: 15px; color: #666; font-size: 14px; line-height: 1.6;">
                                 <strong>说明：</strong>出生日期在此区间内（含边界日期）的投保人，在 ${formatDate(referenceDate)} 这一天年龄满 ${minAgeDays} 天且不超过 ${maxAgeYears} 周岁。
                             </p>
-                        </div>
-
-                        <hr class="divider">
-
-                        <div class="age-range-display">
-                            <p style="font-size: 15px; font-weight: bold; color: #333; margin-bottom: 15px;">
-                                🔍 详细年龄区间分解
-                            </p>
-                            <div class="range-item">
-                                <span class="range-label">最小年龄（${minAgeDays}天）：</span>
-                                <span class="range-value">${formatDate(minAgeRange.earliest)}</span>
-                            </div>
-                            <div class="range-item">
-                                <span class="range-label">最大年龄（${maxAgeYears}周岁）：</span>
-                                <span class="range-value">${formatDate(maxAgeRange.earliest)} ~ ${formatDate(maxAgeRange.latest)}</span>
-                            </div>
                         </div>
                 `;
             }
