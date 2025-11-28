@@ -208,14 +208,14 @@
             text-align: center;
         }
 
-        #bankCard {
+        .bank-card-canvas {
             max-width: 100%;
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             display: none;
         }
 
-        #bankCard.show {
+        .bank-card-canvas.show {
             display: inline-block;
         }
 
@@ -383,6 +383,15 @@
             z-index: 1000;
         }
 
+        .card-preview-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .card-holder-input {
+            margin-top: 15px;
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 1.8em;
@@ -493,7 +502,21 @@
                         </div>
                         <div class="suffix-note">注意：尾号最后一位是校验位，系统将调整前面的数字以确保符合LUHN算法</div>
                     </div>
+                    <!-- 新增：持卡人姓名输入 -->
+                    <div class="input-group card-holder-input">
+                        <label>持卡人姓名（可选）：</label>
+                        <input type="text" id="cardHolderInput" placeholder="例如：张三" maxlength="20">
+                    </div>
                     <button class="btn" onclick="generateCard()">生成卡号</button>
+                    
+                    <!-- 银行卡预览区域 -->
+                    <div class="card-preview-container">
+                        <canvas id="generatedCardCanvas" class="bank-card-canvas" width="800" height="500"></canvas>
+                        <div class="button-group">
+                            <button class="btn-download" id="downloadGeneratedCard">下载银行卡</button>
+                        </div>
+                    </div>
+                    
                     <div id="generateResult" class="result" style="display:none;">
                         <h3>生成结果：</h3>
                         <div id="generateResultContent"></div>
@@ -865,8 +888,11 @@
             const prefix = document.getElementById('prefixInput').value.replace(/\s/g, '');
             const length = parseInt(document.getElementById('lengthInput').value);
             const suffix = document.getElementById('suffixInput').value.replace(/\s/g, '');
+            const cardHolder = document.getElementById('cardHolderInput').value.trim() || '持卡人姓名';
             const resultDiv = document.getElementById('generateResult');
             const contentDiv = document.getElementById('generateResultContent');
+            const canvas = document.getElementById('generatedCardCanvas');
+            const downloadBtn = document.getElementById('downloadGeneratedCard');
 
             if (!prefix || !/^\d+$/.test(prefix)) {
                 alert('请输入有效的前缀数字！');
@@ -894,6 +920,24 @@
             }
 
             const bankInfo = identifyBank(cardNumber);
+            
+            // 获取银行详细信息用于生成卡片
+            const bankDetails = getBankDetails(cardNumber);
+            
+            // 绘制银行卡
+            drawBankCard(canvas, bankDetails, cardNumber, cardHolder, false);
+            
+            // 显示画布和下载按钮
+            canvas.classList.add('show');
+            downloadBtn.classList.add('show');
+            
+            // 设置下载按钮事件
+            downloadBtn.onclick = function() {
+                const link = document.createElement('a');
+                link.download = `银行卡_${cardNumber}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
 
             contentDiv.innerHTML = `
                 <div class="result-item">
@@ -1066,113 +1110,21 @@
             'HXB': { name: '华夏银行', color: '#D32F2F', logo: 'HXB' }
         };
 
-        // 全局变量存储当前识别的银行
-        let currentBank = null;
-        let isManualSelection = false;
-
-        // 监听卡号输入
-        document.getElementById('cardNumber').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\s/g, '');
-            const bankInfo = document.getElementById('bankInfo');
-            const bankSelector = document.getElementById('bankSelector');
-            const manualBank = document.getElementById('manualBank');
+        // 获取银行详细信息
+        function getBankDetails(cardNumber) {
+            const bin = cardNumber.substring(0, 6);
+            const bank = bankDatabase[bin];
             
-            if (value.length >= 6) {
-                const bin = value.substring(0, 6);
-                const bank = bankDatabase[bin];
-                
-                if (bank) {
-                    // 自动识别到银行
-                    currentBank = bank;
-                    isManualSelection = false;
-                    bankInfo.innerHTML = `
-                        <p><strong>✅ 识别银行：</strong>${bank.name}</p>
-                        <p><strong>卡号长度：</strong>${value.length}位</p>
-                    `;
-                    bankInfo.classList.remove('warning');
-                    bankInfo.classList.add('show');
-                    bankSelector.classList.remove('show');
-                    manualBank.value = '';
-                    console.log('✅ 自动识别银行:', bank.name);
-                } else {
-                    // 未识别到银行，显示手动选择
-                    currentBank = null;
-                    isManualSelection = false;
-                    bankInfo.innerHTML = `<p>⚠️ 未识别到银行信息，请手动选择银行</p>`;
-                    bankInfo.classList.add('warning');
-                    bankInfo.classList.add('show');
-                    bankSelector.classList.add('show');
-                    console.log('⚠️ 未识别到银行，显示手动选择');
-                }
-            } else {
-                // 卡号长度不足6位
-                bankInfo.classList.remove('show');
-                bankSelector.classList.remove('show');
-                currentBank = null;
-                isManualSelection = false;
+            if (bank) {
+                return bank;
             }
-        });
-
-        // 监听手动选择银行
-        document.getElementById('manualBank').addEventListener('change', function(e) {
-            const selectedCode = e.target.value;
-            const bankInfo = document.getElementById('bankInfo');
             
-            if (selectedCode) {
-                currentBank = bankCodeMap[selectedCode];
-                isManualSelection = true;
-                bankInfo.innerHTML = `
-                    <p><strong>✅ 已选择银行：</strong>${currentBank.name}</p>
-                    <p style="color: #28a745;">手动指定模式</p>
-                `;
-                bankInfo.classList.remove('warning');
-                bankInfo.classList.add('show');
-                console.log('✅ 手动选择银行:', currentBank.name);
-            } else {
-                if (!currentBank) {
-                    bankInfo.innerHTML = `<p>⚠️ 未识别到银行信息，请手动选择银行</p>`;
-                    bankInfo.classList.add('warning');
-                }
-                isManualSelection = false;
-            }
-        });
-
-        // 生成银行卡
-        document.getElementById('generateBtn').addEventListener('click', function() {
-            const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
-            const cardHolder = document.getElementById('cardHolder').value.trim() || '持卡人姓名';
-            
-            // 验证卡号
-            if (!cardNumber || cardNumber.length < 16) {
-                alert('❌ 请输入至少16位的银行卡号');
-                return;
-            }
-
-            // 验证银行信息
-            if (!currentBank) {
-                alert('❌ 请先选择银行');
-                return;
-            }
-
-            console.log('🎨 开始生成银行卡...');
-            console.log('银行:', currentBank.name);
-            console.log('卡号:', cardNumber);
-            console.log('持卡人:', cardHolder);
-            console.log('选择模式:', isManualSelection ? '手动选择' : '自动识别');
-
-            // 生成卡片
-            drawBankCard(currentBank, cardNumber, cardHolder);
-            
-            // 显示画布和下载按钮
-            document.getElementById('bankCard').classList.add('show');
-            document.getElementById('downloadBtn').classList.add('show');
-            
-            console.log('✅ 银行卡生成成功！');
-        });
+            // 如果没有找到匹配的银行，返回默认银行
+            return { name: '未知银行', color: '#666666', logo: 'BANK' };
+        }
 
         // 绘制银行卡
-        function drawBankCard(bank, cardNumber, cardHolder) {
-            const canvas = document.getElementById('bankCard');
+        function drawBankCard(canvas, bank, cardNumber, cardHolder, isManualSelection = false) {
             const ctx = canvas.getContext('2d');
             
             // 清空画布
@@ -1271,16 +1223,6 @@
             const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
             return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
         }
-
-        // 下载银行卡
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            const canvas = document.getElementById('bankCard');
-            const link = document.createElement('a');
-            link.download = `银行卡_${Date.now()}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            console.log('✅ 银行卡已下载');
-        });
 
         // 页面加载时初始化
         window.onload = function() {
