@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>在线工具集 - 实用网页工具大全</title>
     <link rel="stylesheet" href="css/style.css">
+    <!-- Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* 侧边栏样式 */
         .sidebar {
@@ -78,6 +80,7 @@
             padding: 80px 20px 20px;
             min-height: 100vh;
             background: #f8f9fa;
+            transition: margin-left 0.3s ease;
         }
 
         .tool-container {
@@ -86,6 +89,8 @@
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             overflow: hidden;
+            position: relative;
+            min-height: 500px;
         }
 
         .tool-container.active {
@@ -105,6 +110,25 @@
             background: white;
         }
 
+        /* 加载指示器 */
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #3498db;
+            font-size: 1.2rem;
+            display: none;
+        }
+
+        .tool-container.loading .loading-indicator {
+            display: block;
+        }
+
+        .tool-container.loading .tool-iframe {
+            opacity: 0.3;
+        }
+
         /* 移动端适配 */
         @media (max-width: 768px) {
             .sidebar {
@@ -114,6 +138,7 @@
 
             .sidebar.open {
                 transform: translateX(0);
+                box-shadow: 5px 0 15px rgba(0,0,0,0.2);
             }
 
             .main-content {
@@ -129,10 +154,31 @@
                 background: #2c3e50;
                 color: white;
                 border: none;
-                padding: 10px;
+                padding: 10px 15px;
                 border-radius: 5px;
                 cursor: pointer;
                 font-size: 1.2rem;
+                transition: background 0.3s;
+            }
+
+            .menu-toggle:hover {
+                background: #34495e;
+            }
+
+            /* 移动端侧边栏遮罩 */
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 999;
+            }
+
+            .sidebar-overlay.active {
+                display: block;
             }
         }
 
@@ -167,6 +213,9 @@
             color: #7f8c8d;
             margin-bottom: 40px;
             line-height: 1.6;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .feature-grid {
@@ -180,11 +229,15 @@
             padding: 30px;
             background: #f8f9fa;
             border-radius: 10px;
-            transition: transform 0.3s;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: 2px solid transparent;
         }
 
         .feature-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-color: #3498db;
         }
 
         .feature-icon {
@@ -202,6 +255,49 @@
             color: #7f8c8d;
             line-height: 1.5;
         }
+
+        /* 导航栏样式 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 15px 20px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand h1 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.5rem;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .nav-links a:hover {
+            color: #3498db;
+            background: #f8f9fa;
+        }
     </style>
 </head>
 <body>
@@ -209,41 +305,46 @@
     <header>
         <nav class="navbar">
             <div class="nav-brand">
-                <h1>🔧 在线工具集</h1>
+                <h1><i class="fas fa-tools"></i> 在线工具集</h1>
             </div>
             <ul class="nav-links">
-                <li><a href="#home">首页</a></li>
-                <li><a href="#about">关于</a></li>
+                <li><a href="#home" id="nav-home">首页</a></li>
+                <li><a href="#about" id="nav-about">关于</a></li>
             </ul>
         </nav>
     </header>
 
     <!-- 移动端菜单按钮 -->
-    <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <button class="menu-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- 移动端侧边栏遮罩 -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
 
     <!-- 侧边栏 -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <h2>🛠️ 工具列表</h2>
+            <h2><i class="fas fa-toolbox"></i> 工具列表</h2>
         </div>
         
         <div class="tool-category">开发工具</div>
         <ul class="tool-list">
             <li class="tool-item active" data-tool="welcome">
-                <i>🏠</i>欢迎页面
+                <i class="fas fa-home"></i>欢迎页面
             </li>
             <li class="tool-item" data-tool="idcard-generator">
-                <i>🎭</i>身份信息生成器
+                <i class="fas fa-id-card"></i>身份信息生成器
             </li>
             <li class="tool-item" data-tool="bankcard-tools">
-                <i>🏦</i>银行卡工具合集
+                <i class="fas fa-credit-card"></i>银行卡工具合集
             </li>
             <li class="tool-item" data-tool="age-validator">
-                <i>🛡️</i>保险年龄校验工具
+                <i class="fas fa-shield-alt"></i>保险年龄校验工具
             </li>
-			<li class="tool-item" data-tool="text-comparison">
-				<i>📝</i>文本比对工具
-			</li>
+            <li class="tool-item" data-tool="text-comparison">
+                <i class="fas fa-file-alt"></i>文本比对工具
+            </li>
         </ul>
     </div>
 
@@ -252,125 +353,182 @@
         <!-- 欢迎页面 -->
         <div class="tool-container active" id="welcome">
             <div class="welcome-container">
-                <div class="welcome-icon">🔧</div>
+                <div class="welcome-icon"><i class="fas fa-tools"></i></div>
                 <h1 class="welcome-title">欢迎使用在线工具集</h1>
                 <p class="welcome-description">
-                    一站式网页工具解决方案，提供各种实用的在线工具，免费、易用、无需安装
+                    一站式网页工具解决方案，提供各种实用的在线工具，免费、易用、无需安装。所有工具均在浏览器中运行，保护您的隐私安全。
                 </p>
                 
                 <div class="feature-grid">
-                    <div class="feature-card">
-                        <div class="feature-icon">🎭</div>
+                    <div class="feature-card" onclick="switchTool('idcard-generator')">
+                        <div class="feature-icon"><i class="fas fa-id-card"></i></div>
                         <h3 class="feature-title">身份信息生成器</h3>
                         <p class="feature-description">
                             生成虚拟身份信息，支持多种证件类型，包含身份证、居住证、护照等，适用于开发测试
                         </p>
                     </div>
                     
-                    <div class="feature-card">
-                        <div class="feature-icon">🏦</div>
+                    <div class="feature-card" onclick="switchTool('bankcard-tools')">
+                        <div class="feature-icon"><i class="fas fa-credit-card"></i></div>
                         <h3 class="feature-title">银行卡工具合集</h3>
                         <p class="feature-description">
                             LUHN算法验证与虚拟银行卡生成，支持银行卡号校验、生成和批量操作
                         </p>
                     </div>
                     
-                    <div class="feature-card">
-                        <div class="feature-icon">🛡️</div>
+                    <div class="feature-card" onclick="switchTool('age-validator')">
+                        <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
                         <h3 class="feature-title">保险年龄校验工具</h3>
                         <p class="feature-description">
                             专业的投保年龄计算与校验系统，支持周岁和天数计算，符合保险行业标准
                         </p>
                     </div>
-					
-					<div class="feature-card" onclick="switchTool('text-comparison')" style="cursor: pointer;">
-						<div class="feature-icon">📝</div>
-						<h3 class="feature-title">文本比对工具</h3>
-						<p class="feature-description">
-							快速比对两段文本的差异，计算相似度百分比，并以红绿颜色高亮显示不同与相同之处。
-						</p>
-					</div>
+                    
+                    <div class="feature-card" onclick="switchTool('text-comparison')">
+                        <div class="feature-icon"><i class="fas fa-file-alt"></i></div>
+                        <h3 class="feature-title">文本比对工具</h3>
+                        <p class="feature-description">
+                            快速比对两段文本的差异，计算相似度百分比，并以红绿颜色高亮显示不同与相同之处。
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- 身份信息生成器 -->
         <div class="tool-container" id="idcard-generator">
+            <div class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i> 加载中...
+            </div>
             <iframe src="tools/证件号生成器.html" class="tool-iframe" 
-                    title="身份信息生成器"></iframe>
+                    title="身份信息生成器" onload="hideLoader(this)"></iframe>
         </div>
 
         <!-- 银行卡工具合集 -->
         <div class="tool-container" id="bankcard-tools">
+            <div class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i> 加载中...
+            </div>
             <iframe src="tools/虚拟银行卡生成.html" class="tool-iframe"
-                    title="银行卡工具合集"></iframe>
+                    title="银行卡工具合集" onload="hideLoader(this)"></iframe>
         </div>
 
         <!-- 保险年龄校验工具 -->
         <div class="tool-container" id="age-validator">
+            <div class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i> 加载中...
+            </div>
             <iframe src="tools/年龄校验2.0.html" class="tool-iframe"
-                    title="保险年龄校验工具"></iframe>
+                    title="保险年龄校验工具" onload="hideLoader(this)"></iframe>
         </div>
-		
-		<!-- 文本比对工具  -->
-		<div class="tool-container" id="text-comparison">
-			<iframe src="tools/文本比对工具.html" class="tool-iframe" title="文本比对工具"></iframe>
-		</div>
+        
+        <!-- 文本比对工具 -->
+        <div class="tool-container" id="text-comparison">
+            <div class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i> 加载中...
+            </div>
+            <iframe src="tools/文本比对工具.html" class="tool-iframe" 
+                    title="文本比对工具" onload="hideLoader(this)"></iframe>
+        </div>
     </main>
 
-    <script src="js/script.js"></script>
     <script>
         // 工具切换功能
-        document.addEventListener('DOMContentLoaded', function() {
+        function switchTool(toolId) {
             const toolItems = document.querySelectorAll('.tool-item');
             const toolContainers = document.querySelectorAll('.tool-container');
             
+            // 更新活动状态
             toolItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    const toolId = this.getAttribute('data-tool');
-                    
-                    // 更新活动状态
-                    toolItems.forEach(i => i.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // 显示对应的工具容器
-                    toolContainers.forEach(container => {
-                        container.classList.remove('active');
-                    });
-                    document.getElementById(toolId).classList.add('active');
-                    
-                    // 在移动端点击后自动关闭侧边栏
-                    if (window.innerWidth <= 768) {
-                        toggleSidebar();
-                    }
-                });
+                item.classList.remove('active');
+                if (item.getAttribute('data-tool') === toolId) {
+                    item.classList.add('active');
+                }
             });
-        });
+            
+            // 显示对应的工具容器
+            toolContainers.forEach(container => {
+                container.classList.remove('active');
+                if (container.id === toolId) {
+                    container.classList.add('active');
+                    // 显示加载指示器
+                    container.classList.add('loading');
+                }
+            });
+            
+            // 在移动端点击后自动关闭侧边栏
+            if (window.innerWidth <= 768) {
+                toggleSidebar();
+            }
+            
+            // 更新页面标题
+            const toolName = document.querySelector(`.tool-item[data-tool="${toolId}"]`).textContent.trim();
+            document.title = `${toolName} - 在线工具集`;
+        }
 
         // 侧边栏切换（移动端）
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
             sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
         }
 
-        // 点击页面其他区域关闭侧边栏（移动端）
-        document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const menuToggle = document.querySelector('.menu-toggle');
-            
-            if (window.innerWidth <= 768 && 
-                !sidebar.contains(event.target) && 
-                !menuToggle.contains(event.target)) {
-                sidebar.classList.remove('open');
-            }
-        });
+        // 隐藏加载指示器
+        function hideLoader(iframe) {
+            const container = iframe.parentElement;
+            container.classList.remove('loading');
+        }
 
-        // 窗口大小变化时调整布局
-        window.addEventListener('resize', function() {
-            const sidebar = document.getElementById('sidebar');
-            if (window.innerWidth > 768) {
-                sidebar.classList.remove('open');
-            }
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 侧边栏工具点击事件
+            const toolItems = document.querySelectorAll('.tool-item');
+            toolItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const toolId = this.getAttribute('data-tool');
+                    switchTool(toolId);
+                });
+            });
+            
+            // 导航栏链接点击事件
+            document.getElementById('nav-home').addEventListener('click', function(e) {
+                e.preventDefault();
+                switchTool('welcome');
+                // 平滑滚动到顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            document.getElementById('nav-about').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('在线工具集 v1.0\n\n提供各种实用的在线工具，免费、易用、无需安装。\n\n所有工具均在本地浏览器中运行，保障您的数据安全。\n\n更多工具正在开发中...');
+            });
+            
+            // 点击页面其他区域关闭侧边栏（移动端）
+            document.addEventListener('click', function(event) {
+                const sidebar = document.getElementById('sidebar');
+                const menuToggle = document.querySelector('.menu-toggle');
+                
+                if (window.innerWidth <= 768 && 
+                    !sidebar.contains(event.target) && 
+                    !menuToggle.contains(event.target) &&
+                    sidebar.classList.contains('open')) {
+                    toggleSidebar();
+                }
+            });
+            
+            // 窗口大小变化时调整布局
+            window.addEventListener('resize', function() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('sidebar-overlay');
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                }
+            });
+            
+            // 初始加载欢迎页面
+            switchTool('welcome');
         });
     </script>
 </body>
